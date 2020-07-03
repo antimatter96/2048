@@ -49,13 +49,15 @@ func (game *TwoZeroFourEight) Init() {
 }
 
 func (g *TwoZeroFourEight) Print() {
+	fmt.Println(strings.Repeat("-", 1+2<<(N)+N))
 	for i := 0; i < N; i++ {
-		fmt.Print("[  ")
+		fmt.Print("|  ")
 		for j := 0; j < N-1; j++ {
-			fmt.Printf("%-4d  ", g.board[i][j])
+			fmt.Printf("%-4d  |  ", g.board[i][j])
 		}
 		fmt.Printf("%-4d", g.board[i][N-1])
-		fmt.Print("  ]\n")
+		fmt.Print("  |\n")
+		fmt.Println(strings.Repeat("-", 1+2<<(N)+N))
 	}
 }
 
