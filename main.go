@@ -1,42 +1,39 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/antimatter96/2048/game"
 )
 
 func main() {
-	x := &game.TwoZeroFourEight{}
-	x.Init()
-	x.Print()
-	fmt.Println("")
-	x.FillRandom()
-	x.Print()
-	fmt.Println("")
-	x.MoveLeft()
-	x.Print()
-	fmt.Println("")
+	game := game.NewGame()
+	fmt.Println(game.Print())
+	reader := bufio.NewReader(os.Stdin)
 
-	x.FillRandom()
-	x.Print()
-	fmt.Println("")
-	x.MoveLeft()
-	x.Print()
-	fmt.Println("")
+	for i := 0; i < 20; i++ {
+		char, _, err := reader.ReadRune()
 
-	x.FillRandom()
-	x.Print()
-	fmt.Println("")
-	x.MoveLeft()
-	x.Print()
-	fmt.Println("")
+		if err != nil {
+			fmt.Println(err)
+		}
 
-	x.FillRandom()
-	x.Print()
-	fmt.Println("")
-	x.MoveLeft()
-	x.Print()
-	fmt.Println("")
+		fmt.Println("Got an ", char)
+		switch char {
+		case 'E':
+			break
+		default:
+			fmt.Println(game.Move(char))
+			break
+		}
+		fmt.Println(game.Print())
 
+		char, _, err = reader.ReadRune()
+
+		if char == 10 {
+			continue
+		}
+	}
 }
