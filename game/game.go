@@ -25,7 +25,7 @@ type TwoZeroFourEight struct {
 }
 
 func (g *TwoZeroFourEight) FillRandom() {
-	err, x, y := g.BoundaryCells()
+	x, y, err := g.BoundaryCells()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -61,7 +61,7 @@ func (g *TwoZeroFourEight) Print() {
 	}
 }
 
-func (g *TwoZeroFourEight) BoundaryCells() (error, int, int) {
+func (g *TwoZeroFourEight) BoundaryCells() (int, int, error) {
 	mp := make(map[string]bool)
 
 	for i := 0; i < N; i++ {
@@ -116,7 +116,7 @@ func (g *TwoZeroFourEight) BoundaryCells() (error, int, int) {
 		fmt.Println(">>>>>")
 		g.Print()
 		fmt.Println("<<<<<")
-		return fmt.Errorf("%v", "FULL BOARD"), 0, 0
+		return 0, 0, fmt.Errorf("%v", "FULL BOARD")
 	}
 
 	picked := g.rand.Intn(len(arr))
@@ -125,7 +125,7 @@ func (g *TwoZeroFourEight) BoundaryCells() (error, int, int) {
 	x, _ := strconv.Atoi(xy[0])
 	y, _ := strconv.Atoi(xy[1])
 
-	return nil, x, y
+	return x, y, nil
 }
 
 func (g *TwoZeroFourEight) MovesPossible() bool {
@@ -176,7 +176,7 @@ func lessThan(limit int) func(n int) bool {
 	}
 }
 
-func (g *TwoZeroFourEight) MoveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
+func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
 
 	changed := false
 
@@ -199,7 +199,7 @@ func (g *TwoZeroFourEight) MoveHorizontal(changeI, changeJ mover, compI, compJ c
 	}
 
 	if changed {
-		changed = changed || g.MoveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
+		changed = changed || g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
 	}
 
 	return changed
@@ -209,7 +209,7 @@ func (g *TwoZeroFourEight) MoveLeft() bool {
 	greaterThanZero := greaterThan(0)
 	lessThanN := lessThan(N)
 
-	return g.MoveHorizontal(inc, dec, lessThanN, greaterThanZero, 0, N-1)
+	return g.moveHorizontal(inc, dec, lessThanN, greaterThanZero, 0, N-1)
 
 	// for j := N - 1; greaterThanZero(j); j = dec(j) {
 	// 	for i := 0; lessThanN(i); i = inc(i) {
@@ -234,7 +234,7 @@ func (g *TwoZeroFourEight) MoveRight() bool {
 	lessThanN := lessThan(N)
 	lessThanNMinusOne := lessThan(N - 1)
 
-	return g.MoveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0)
+	return g.moveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0)
 
 	// for j := 0; lessThanNMinusOne(j); j = inc(j) {
 	// 	for i := 0; lessThanN(i); i = inc(i) {
