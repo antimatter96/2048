@@ -130,7 +130,9 @@ func (g *TwoZeroFourEight) FillRandom() {
 		return
 	}
 
-	g.board[x][y] = 2 << (g.rand.Intn(1) + 1)
+	toAdd := 2 << (g.rand.Intn(1) + 1)
+	g.board[x][y] = toAdd
+	fmt.Println("Added", toAdd, "at", x, y)
 }
 
 func (g *TwoZeroFourEight) movesPossible() bool {
@@ -160,6 +162,7 @@ func (g *TwoZeroFourEight) movesPossible() bool {
 }
 
 func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
+	fmt.Println("Call to moveHorizontal")
 	changed := false
 
 	for j := startJ; compJ(j); j = changeJ(j) {
@@ -217,33 +220,34 @@ func (g *TwoZeroFourEight) moveRight() bool {
 	lessThanN := lessThan(N)
 	lessThanNMinusOne := lessThan(N - 1)
 
-	//return g.moveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0)
+	return g.moveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0)
 
-	changed := false
-	for j := 0; lessThanNMinusOne(j); j = inc(j) {
-		for i := 0; lessThanN(i); i = inc(i) {
-			if g.board[i][j] == 0 {
-				continue
-			}
-			if g.board[i][j] == g.board[i][inc(j)] {
-				fmt.Println("chanign")
-				g.board[i][j] = 0
-				g.board[i][j+1] *= 2
-				changed = true
-			} else if g.board[i][inc(j)] == 0 {
-				fmt.Println("moving")
-				g.board[i][inc(j)] = g.board[i][j]
-				g.board[i][j] = 0
-				changed = true
-			}
-		}
-	}
+	// changed := false
+	// for j := 0; lessThanNMinusOne(j); j = inc(j) {
+	// 	for i := 0; lessThanN(i); i = inc(i) {
+	// 		if g.board[i][j] == 0 {
+	// 			continue
+	// 		}
+	// 		if g.board[i][j] == g.board[i][inc(j)] {
+	// 			fmt.Println("chanign")
+	// 			g.board[i][j] = 0
+	// 			g.board[i][j+1] *= 2
+	// 			changed = true
+	// 		} else if g.board[i][inc(j)] == 0 {
+	// 			fmt.Println("moving", i, j, "->", i, inc(j), " ", g.board[i][j])
+	// 			//g.Print()
+	// 			g.board[i][inc(j)] = g.board[i][j]
+	// 			g.board[i][j] = 0
+	// 			changed = true
+	// 		}
+	// 	}
+	// }
 
-	if changed {
-		changed = changed || g.moveLeft()
-	}
+	// if changed {
+	// 	changed = changed || g.moveLeft()
+	// }
 
-	return changed
+	// return changed
 }
 
 func (g *TwoZeroFourEight) moveDown() bool {
@@ -297,6 +301,8 @@ func (g *TwoZeroFourEight) moveUp() bool {
 }
 
 func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
+	fmt.Println("Call to moveVertical")
+
 	changed := false
 
 	for i := startI; compI(i); i = changeI(i) {
