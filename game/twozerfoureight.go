@@ -35,9 +35,9 @@ func (g *TwoZeroFourEight) init(logger *zap.Logger) {
 		g.board[i] = make([]int, N)
 	}
 
-	g.board[N-1][0] = 2
-	g.board[N-1][1] = 2
-	g.board[N-2][0] = 2
+	g.board[N-1][0] = 2 << (g.rand.Intn(1) + 1)
+	g.board[N-1][1] = 2 << (g.rand.Intn(1) + 1)
+	g.board[N-2][0] = 2 << (g.rand.Intn(1) + 1)
 
 	g.logger = logger
 }
@@ -170,7 +170,9 @@ func (g *TwoZeroFourEight) movesPossible() bool {
 
 func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
 	g.logger.Debug("Call to moveHorizontal")
+
 	changed := false
+	moved := false
 
 	for j := startJ; compJ(j); j = changeJ(j) {
 		for i := startI; compI(i); i = changeI(i) {
@@ -195,13 +197,14 @@ func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ c
 				)
 				g.board[i][changeJ(j)] = g.board[i][j]
 				g.board[i][j] = 0
-				changed = true
+				moved = true
 			}
 		}
 	}
 
-	if changed {
-		_ = g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
+	if changed || moved {
+		temp := g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
+		changed = changed || temp
 	}
 
 	return changed
@@ -311,6 +314,7 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 	g.logger.Debug("Call to moveVertical")
 
 	changed := false
+	moved := false
 
 	for i := startI; compI(i); i = changeI(i) {
 		for j := startJ; compJ(j); j = changeJ(j) {
@@ -335,12 +339,14 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 				)
 				g.board[changeI(i)][j] = g.board[i][j]
 				g.board[i][j] = 0
+				moved = true
 			}
 		}
 	}
 
-	if changed {
-		_ = g.moveVertical(changeI, changeJ, compI, compJ, startI, startJ)
+	if changed || moved {
+		temp := g.moveVertical(changeI, changeJ, compI, compJ, startI, startJ)
+		changed = changed || temp
 	}
 
 	return changed

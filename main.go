@@ -12,13 +12,13 @@ import (
 const enter rune = 10
 
 func main() {
-
 	logger, _ := zap.NewProduction()
 
 	gameInstance := game.NewGame(logger)
-	fmt.Println(gameInstance.Print())
 	reader := bufio.NewReader(os.Stdin)
 
+	fmt.Println("Welcome")
+	fmt.Println(gameInstance.Print())
 	for i := 0; i < 20; i++ {
 		char, _, err := reader.ReadRune()
 
@@ -26,12 +26,12 @@ func main() {
 			fmt.Println(err)
 		}
 
-		fmt.Println("Got a", char)
+		fmt.Println("You entered", string(char))
 		switch char {
 		case 'E':
 			break
 		default:
-			fmt.Println(gameInstance.Move(char))
+			gameInstance.Move(char)
 		}
 		fmt.Println(gameInstance.Print())
 
