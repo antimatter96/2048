@@ -182,7 +182,7 @@ func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ c
 	}
 
 	if changed {
-		changed = changed || g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
+		_ = g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
 	}
 
 	return changed
@@ -318,7 +318,7 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 	}
 
 	if changed {
-		changed = changed || g.moveVertical(changeI, changeJ, compI, compJ, startI, startJ)
+		_ = g.moveVertical(changeI, changeJ, compI, compJ, startI, startJ)
 	}
 
 	return changed
