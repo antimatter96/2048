@@ -126,7 +126,7 @@ func (g *TwoZeroFourEight) boundaryCells() (int, int, error) {
 	return x, y, nil
 }
 
-func (g *TwoZeroFourEight) FillRandom() {
+func (g *TwoZeroFourEight) fillRandom() {
 	x, y, err := g.boundaryCells()
 	if err != nil {
 		g.logger.Error("Error while filling", zap.Error(err))
@@ -215,22 +215,6 @@ func (g *TwoZeroFourEight) moveLeft() bool {
 	lessThanN := lessThan(N)
 
 	return g.moveHorizontal(inc, dec, lessThanN, greaterThanZero, 0, N-1)
-
-	// for j := N - 1; greaterThanZero(j); j = dec(j) {
-	// 	for i := 0; lessThanN(i); i = inc(i) {
-	// 		if g.board[i][j] == 0 {
-	// 			continue
-	// 		}
-	// 		if g.board[i][j] == g.board[i][dec(j)] {
-	// 			g.board[i][j] = 0
-	// 			g.board[i][dec(j)] *= 2
-	// 			changed = true
-	// 		} else if g.board[i][dec(j)] == 0 {
-	// 			g.board[i][dec(j)] = g.board[i][j]
-	// 			g.board[i][j] = 0
-	// 		}
-	// 	}
-	// }
 }
 
 func (g *TwoZeroFourEight) moveRight() bool {
@@ -238,76 +222,6 @@ func (g *TwoZeroFourEight) moveRight() bool {
 	lessThanNMinusOne := lessThan(N - 1)
 
 	return g.moveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0)
-
-	// changed := false
-	// for j := 0; lessThanNMinusOne(j); j = inc(j) {
-	// 	for i := 0; lessThanN(i); i = inc(i) {
-	// 		if g.board[i][j] == 0 {
-	// 			continue
-	// 		}
-	// 		if g.board[i][j] == g.board[i][inc(j)] {
-	// 			g.board[i][j] = 0
-	// 			g.board[i][j+1] *= 2
-	// 			changed = true
-	// 		} else if g.board[i][inc(j)] == 0 {
-	// 			g.board[i][inc(j)] = g.board[i][j]
-	// 			g.board[i][j] = 0
-	// 			changed = true
-	// 		}
-	// 	}
-	// }
-
-	// if changed {
-	// 	changed = changed || g.moveLeft()
-	// }
-
-	// return changed
-}
-
-func (g *TwoZeroFourEight) moveDown() bool {
-	lessThanNMinus1 := lessThan(N - 1)
-	lessThanN := lessThan(N)
-
-	return g.moveVertical(inc, inc, lessThanNMinus1, lessThanN, 0, 0)
-
-	// for i := 0; i < N-1; i++ {
-	// 	for j := 0; j < N; j++ {
-	// 		if g.board[i][j] == 0 {
-	// 			continue
-	// 		}
-	// 		if g.board[i][j] == g.board[i+1][j] {
-	// 			g.board[i][j] = 0
-	// 			g.board[i+1][j] *= 2
-	// 			changed = true
-	// 		} else if g.board[i+1][j] == 0 {
-	// 			g.board[i+1][j] = g.board[i][j]
-	// 			g.board[i][j] = 0
-	// 		}
-	// 	}
-	// }
-}
-
-func (g *TwoZeroFourEight) moveUp() bool {
-	greaterThan := greaterThan(0)
-	lessThanN := lessThan(N)
-
-	return g.moveVertical(dec, inc, greaterThan, lessThanN, N-1, 0)
-
-	// for i := N - 1; i > 0; i-- {
-	// 	for j := 0; j < N; j++ {
-	// 		if g.board[i][j] == 0 {
-	// 			continue
-	// 		}
-	// 		if g.board[i][j] == g.board[i-1][j] {
-	// 			g.board[i][j] = 0
-	// 			g.board[i-1][j] *= 2
-	// 			changed = true
-	// 		} else if g.board[i-1][j] == 0 {
-	// 			g.board[i-1][j] = g.board[i][j]
-	// 			g.board[i][j] = 0
-	// 		}
-	// 	}
-	// }
 }
 
 func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
@@ -352,6 +266,20 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 	return changed
 }
 
+func (g *TwoZeroFourEight) moveDown() bool {
+	lessThanNMinus1 := lessThan(N - 1)
+	lessThanN := lessThan(N)
+
+	return g.moveVertical(inc, inc, lessThanNMinus1, lessThanN, 0, 0)
+}
+
+func (g *TwoZeroFourEight) moveUp() bool {
+	greaterThan := greaterThan(0)
+	lessThanN := lessThan(N)
+
+	return g.moveVertical(dec, inc, greaterThan, lessThanN, N-1, 0)
+}
+
 // Move is used by the controller
 func (g *TwoZeroFourEight) Move(move rune) bool {
 	done := false
@@ -377,7 +305,7 @@ func (g *TwoZeroFourEight) Move(move rune) bool {
 	}
 	if done {
 		g.logger.Debug("Move done")
-		g.FillRandom()
+		g.fillRandom()
 	}
 	return done
 }
