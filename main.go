@@ -6,11 +6,17 @@ import (
 	"os"
 
 	"github.com/antimatter96/2048/game"
+	"go.uber.org/zap"
 )
 
+const enter rune = 10
+
 func main() {
-	game := game.NewGame()
-	fmt.Println(game.Print())
+
+	logger, _ := zap.NewProduction()
+
+	gameInstance := game.NewGame(logger)
+	fmt.Println(gameInstance.Print())
 	reader := bufio.NewReader(os.Stdin)
 
 	for i := 0; i < 20; i++ {
@@ -20,19 +26,18 @@ func main() {
 			fmt.Println(err)
 		}
 
-		fmt.Println("Got an ", char)
+		fmt.Println("Got a", char)
 		switch char {
 		case 'E':
 			break
 		default:
-			fmt.Println(game.Move(char))
-			break
+			fmt.Println(gameInstance.Move(char))
 		}
-		fmt.Println(game.Print())
+		fmt.Println(gameInstance.Print())
 
-		char, _, err = reader.ReadRune()
+		char, _, _ = reader.ReadRune()
 
-		if char == 10 {
+		if char == enter {
 			continue
 		}
 	}

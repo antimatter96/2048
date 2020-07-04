@@ -6,23 +6,27 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 const N = 4
 const nDashed = 1 + (2 * (N + (2 << (N - 1)))) // Not even true :p
+const minStringSize = 350                      // Is 342 to be exqct :p
 
 type TwoZeroFourEight struct {
-	board []([]int)
-	rand  *rand.Rand
+	board  [][]int
+	rand   *rand.Rand
+	logger *zap.Logger
 }
 
-func NewGame() *TwoZeroFourEight {
+func NewGame(logger *zap.Logger) *TwoZeroFourEight {
 	g := &TwoZeroFourEight{}
-	g.init()
+	g.init(logger)
 	return g
 }
 
-func (g *TwoZeroFourEight) init() {
+func (g *TwoZeroFourEight) init(logger *zap.Logger) {
 	source := rand.NewSource(time.Now().UnixNano())
 	g.rand = rand.New(source)
 
@@ -34,11 +38,13 @@ func (g *TwoZeroFourEight) init() {
 	g.board[N-1][0] = 2
 	g.board[N-1][1] = 2
 	g.board[N-2][0] = 2
+
+	g.logger = logger
 }
 
 func (g *TwoZeroFourEight) Print() string {
 	var b strings.Builder
-	b.Grow(350)
+	b.Grow(minStringSize)
 
 	b.WriteString(strings.Repeat("-", nDashed))
 	b.WriteByte('\n')
@@ -108,10 +114,7 @@ func (g *TwoZeroFourEight) boundaryCells() (int, int, error) {
 	}
 
 	if len(arr) == 0 {
-		fmt.Println(">>>>>")
-		g.Print()
-		fmt.Println("<<<<<")
-		return 0, 0, fmt.Errorf("%v", "FULL BOARD")
+		return 0, 0, fmt.Errorf("%v\n%s", "FULL BOARD", g.Print())
 	}
 
 	picked := g.rand.Intn(len(arr))
@@ -126,13 +129,17 @@ func (g *TwoZeroFourEight) boundaryCells() (int, int, error) {
 func (g *TwoZeroFourEight) FillRandom() {
 	x, y, err := g.boundaryCells()
 	if err != nil {
-		fmt.Println(err)
+		g.logger.Error("Error while filling", zap.Error(err))
 		return
 	}
 
 	toAdd := 2 << (g.rand.Intn(1) + 1)
 	g.board[x][y] = toAdd
-	fmt.Println("Added", toAdd, "at", x, y)
+	g.logger.Debug("Added field",
+		zap.Int("added", toAdd),
+		zap.Int("x", x),
+		zap.Int("y", y),
+	)
 }
 
 func (g *TwoZeroFourEight) movesPossible() bool {
@@ -162,7 +169,7 @@ func (g *TwoZeroFourEight) movesPossible() bool {
 }
 
 func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
-	fmt.Println("Call to moveHorizontal")
+	g.logger.Debug("Call to moveHorizontal")
 	changed := false
 
 	for j := startJ; compJ(j); j = changeJ(j) {
@@ -171,12 +178,21 @@ func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ c
 				continue
 			}
 			if g.board[i][j] == g.board[i][changeJ(j)] {
-				//fmt.Println("chanign")
+				g.logger.Debug("changing",
+					zap.Int("x", i),
+					zap.Int("y", changeJ(j)),
+					zap.Int("value", g.board[i][j]),
+					zap.Int("new value", g.board[i][j]*2),
+				)
 				g.board[i][j] = 0
 				g.board[i][changeJ(j)] *= 2
 				changed = true
 			} else if g.board[i][changeJ(j)] == 0 {
-				//fmt.Println("moving")
+				g.logger.Debug("moving",
+					zap.Int("x", i),
+					zap.Int("y", changeJ(j)),
+					zap.Int("new value", g.board[i][j]),
+				)
 				g.board[i][changeJ(j)] = g.board[i][j]
 				g.board[i][j] = 0
 				changed = true
@@ -203,12 +219,10 @@ func (g *TwoZeroFourEight) moveLeft() bool {
 	// 			continue
 	// 		}
 	// 		if g.board[i][j] == g.board[i][dec(j)] {
-	// 			fmt.Println("chanign")
 	// 			g.board[i][j] = 0
 	// 			g.board[i][dec(j)] *= 2
 	// 			changed = true
 	// 		} else if g.board[i][dec(j)] == 0 {
-	// 			fmt.Println("moving")
 	// 			g.board[i][dec(j)] = g.board[i][j]
 	// 			g.board[i][j] = 0
 	// 		}
@@ -229,13 +243,10 @@ func (g *TwoZeroFourEight) moveRight() bool {
 	// 			continue
 	// 		}
 	// 		if g.board[i][j] == g.board[i][inc(j)] {
-	// 			fmt.Println("chanign")
 	// 			g.board[i][j] = 0
 	// 			g.board[i][j+1] *= 2
 	// 			changed = true
 	// 		} else if g.board[i][inc(j)] == 0 {
-	// 			fmt.Println("moving", i, j, "->", i, inc(j), " ", g.board[i][j])
-	// 			//g.Print()
 	// 			g.board[i][inc(j)] = g.board[i][j]
 	// 			g.board[i][j] = 0
 	// 			changed = true
@@ -262,12 +273,10 @@ func (g *TwoZeroFourEight) moveDown() bool {
 	// 			continue
 	// 		}
 	// 		if g.board[i][j] == g.board[i+1][j] {
-	// 			fmt.Println("chanign")
 	// 			g.board[i][j] = 0
 	// 			g.board[i+1][j] *= 2
 	// 			changed = true
 	// 		} else if g.board[i+1][j] == 0 {
-	// 			fmt.Println("moving")
 	// 			g.board[i+1][j] = g.board[i][j]
 	// 			g.board[i][j] = 0
 	// 		}
@@ -287,12 +296,10 @@ func (g *TwoZeroFourEight) moveUp() bool {
 	// 			continue
 	// 		}
 	// 		if g.board[i][j] == g.board[i-1][j] {
-	// 			fmt.Println("chanign")
 	// 			g.board[i][j] = 0
 	// 			g.board[i-1][j] *= 2
 	// 			changed = true
 	// 		} else if g.board[i-1][j] == 0 {
-	// 			fmt.Println("moving")
 	// 			g.board[i-1][j] = g.board[i][j]
 	// 			g.board[i][j] = 0
 	// 		}
@@ -301,7 +308,7 @@ func (g *TwoZeroFourEight) moveUp() bool {
 }
 
 func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
-	fmt.Println("Call to moveVertical")
+	g.logger.Debug("Call to moveVertical")
 
 	changed := false
 
@@ -311,12 +318,21 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 				continue
 			}
 			if g.board[i][j] == g.board[changeI(i)][j] {
-				//fmt.Println("chanign")
+				g.logger.Debug("changing",
+					zap.Int("x", changeI(i)),
+					zap.Int("y", j),
+					zap.Int("value", g.board[i][j]),
+					zap.Int("new value", g.board[i][j]*2),
+				)
 				g.board[i][j] = 0
 				g.board[changeI(i)][j] *= 2
 				changed = true
 			} else if g.board[changeI(i)][j] == 0 {
-				//fmt.Println("moving")
+				g.logger.Debug("moving",
+					zap.Int("x", changeI(i)),
+					zap.Int("y", j),
+					zap.Int("new value", g.board[i][j]),
+				)
 				g.board[changeI(i)][j] = g.board[i][j]
 				g.board[i][j] = 0
 			}
@@ -330,6 +346,7 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 	return changed
 }
 
+// Move is used by the controller
 func (g *TwoZeroFourEight) Move(move rune) bool {
 	done := false
 	switch move {
@@ -353,7 +370,7 @@ func (g *TwoZeroFourEight) Move(move rune) bool {
 		done = false
 	}
 	if done {
-		fmt.Println("Move done")
+		g.logger.Debug("Move done")
 		g.FillRandom()
 	}
 	return done
