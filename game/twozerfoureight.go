@@ -62,6 +62,7 @@ func (g *TwoZeroFourEight) getString(i int) string {
 	return fmt.Sprintf("%s%s%s%s", colorOff, g.colorCodes[i], g.paddedText[i], colorOff)
 }
 
+// Print returns a formatted visual rep of the board
 func (g *TwoZeroFourEight) Print() string {
 	var b strings.Builder
 	b.Grow(minStringSize)
