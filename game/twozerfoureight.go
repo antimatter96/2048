@@ -62,70 +62,6 @@ func (g *TwoZeroFourEight) Print() string {
 	return b.String()
 }
 
-func (g *TwoZeroFourEight) boundaryCells() (int, int, error) {
-	mp := make(map[string]bool)
-
-	for i := 0; i < N; i++ {
-		if g.board[i][0] == 0 && g.board[i][N-1] == 0 {
-			continue
-		}
-		if g.board[i][0] == 0 {
-			for j := (N - 1); j > -1; j-- {
-				if g.board[i][j] == 0 {
-					mp[fmt.Sprintf("%d,%d", i, j)] = true
-					break
-				}
-			}
-		} else {
-			for j := 0; j < N; j++ {
-				if g.board[i][j] == 0 {
-					mp[fmt.Sprintf("%d,%d", i, j)] = true
-					break
-				}
-			}
-		}
-	}
-
-	for j := 0; j < N; j++ {
-		if g.board[0][j] == 0 && g.board[N-1][j] == 0 {
-			continue
-		}
-		if g.board[0][j] == 0 {
-			for i := (N - 1); i > -1; i-- {
-				if g.board[i][j] == 0 {
-					mp[fmt.Sprintf("%d,%d", i, j)] = true
-					break
-				}
-			}
-		} else {
-			for i := 0; i < N; i++ {
-				if g.board[i][j] == 0 {
-					mp[fmt.Sprintf("%d,%d", i, j)] = true
-					break
-				}
-			}
-		}
-	}
-
-	var arr []string
-
-	for k := range mp {
-		arr = append(arr, k)
-	}
-
-	if len(arr) == 0 {
-		return 0, 0, fmt.Errorf("%v\n%s", "FULL BOARD", g.Print())
-	}
-
-	picked := g.rand.Intn(len(arr))
-
-	xy := strings.Split(arr[picked], ",")
-	x, _ := strconv.Atoi(xy[0])
-	y, _ := strconv.Atoi(xy[1])
-
-	return x, y, nil
-}
-
 func (g *TwoZeroFourEight) emptyCells() (int, int, error) {
 	mp := make(map[string]bool)
 
@@ -171,32 +107,6 @@ func (g *TwoZeroFourEight) fillRandom() {
 		zap.Int("x", x),
 		zap.Int("y", y),
 	)
-}
-
-func (g *TwoZeroFourEight) movesPossible() bool {
-	for i := 0; i < N; i++ {
-		for j := 0; j < N-1; j++ {
-			if g.board[i][j] == 0 {
-				continue
-			}
-			if g.board[i][j] == g.board[i][j+1] {
-				return true
-			}
-		}
-	}
-
-	for j := 0; j < N; j++ {
-		for i := 0; i < N-1; i++ {
-			if g.board[i][j] == 0 {
-				continue
-			}
-			if g.board[i][j] == g.board[i+1][j] {
-				return true
-			}
-		}
-	}
-
-	return false
 }
 
 func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int, combine bool) bool {
