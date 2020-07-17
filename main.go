@@ -25,7 +25,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		print("\033[H\033[2J")
 		fmt.Println("You entered", string(char))
 		switch char {
 		case 'E':
