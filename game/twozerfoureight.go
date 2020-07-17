@@ -284,21 +284,21 @@ func (g *TwoZeroFourEight) moveUp() bool {
 func (g *TwoZeroFourEight) Move(move rune) bool {
 	done := false
 	switch move {
-	case 'l':
+	case 'A':
 		done = g.moveLeft()
-	case 'L':
+	case 'a':
 		done = g.moveLeft()
-	case 'r':
-		done = g.moveRight()
-	case 'R':
-		done = g.moveRight()
-	case 'u':
-		done = g.moveUp()
-	case 'U':
-		done = g.moveUp()
-	case 'd':
-		done = g.moveDown()
 	case 'D':
+		done = g.moveRight()
+	case 'd':
+		done = g.moveRight()
+	case 'W':
+		done = g.moveUp()
+	case 'w':
+		done = g.moveUp()
+	case 'S':
+		done = g.moveDown()
+	case 's':
 		done = g.moveDown()
 	default:
 		done = false
