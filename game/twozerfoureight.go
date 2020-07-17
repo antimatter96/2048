@@ -35,9 +35,9 @@ func (g *TwoZeroFourEight) init(logger *zap.Logger) {
 		g.board[i] = make([]int, N)
 	}
 
-	g.board[N-1][0] = 2 << (g.rand.Intn(1) + 1)
-	g.board[N-1][1] = 2 << (g.rand.Intn(1) + 1)
-	g.board[N-2][0] = 2 << (g.rand.Intn(1) + 1)
+	g.board[N-1][0] = 2 << g.rand.Intn(2)
+	g.board[N-1][1] = 2 << g.rand.Intn(2)
+	g.board[N-2][0] = 2 << g.rand.Intn(2)
 
 	g.logger = logger
 }
@@ -133,7 +133,7 @@ func (g *TwoZeroFourEight) fillRandom() {
 		return
 	}
 
-	toAdd := 2 << (g.rand.Intn(1) + 1)
+	toAdd := 2 << g.rand.Intn(2)
 	g.board[x][y] = toAdd
 	g.logger.Debug("Added field",
 		zap.Int("added", toAdd),
