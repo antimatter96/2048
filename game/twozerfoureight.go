@@ -126,8 +126,39 @@ func (g *TwoZeroFourEight) boundaryCells() (int, int, error) {
 	return x, y, nil
 }
 
+func (g *TwoZeroFourEight) emptyCells() (int, int, error) {
+	mp := make(map[string]bool)
+
+	for i := 0; i < N; i++ {
+		for j := 0; j < N; j++ {
+			if g.board[i][j] == 0 {
+				mp[fmt.Sprintf("%d,%d", i, j)] = true
+				break
+			}
+		}
+	}
+
+	var arr []string
+
+	for k := range mp {
+		arr = append(arr, k)
+	}
+
+	if len(arr) == 0 {
+		return 0, 0, fmt.Errorf("%v\n%s", "FULL BOARD", g.Print())
+	}
+
+	picked := g.rand.Intn(len(arr))
+
+	xy := strings.Split(arr[picked], ",")
+	x, _ := strconv.Atoi(xy[0])
+	y, _ := strconv.Atoi(xy[1])
+
+	return x, y, nil
+}
+
 func (g *TwoZeroFourEight) fillRandom() {
-	x, y, err := g.boundaryCells()
+	x, y, err := g.emptyCells()
 	if err != nil {
 		g.logger.Error("Error while filling", zap.Error(err))
 		return
