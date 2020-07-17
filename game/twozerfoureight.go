@@ -199,18 +199,17 @@ func (g *TwoZeroFourEight) movesPossible() bool {
 	return false
 }
 
-func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
+func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ comp, startI, startJ int, combine bool) bool {
 	g.logger.Debug("Call to moveHorizontal")
 
 	changed := false
-	moved := false
 
 	for j := startJ; compJ(j); j = changeJ(j) {
-		for i := startI; compI(i); i = changeI(i) {
+		for i := startI; compI(i) && compJ(j); i = changeI(i) {
 			if g.board[i][j] == 0 {
 				continue
 			}
-			if g.board[i][j] == g.board[i][changeJ(j)] {
+			if combine && g.board[i][j] == g.board[i][changeJ(j)] {
 				g.logger.Debug("changing",
 					zap.Int("x", i),
 					zap.Int("y", changeJ(j)),
@@ -219,6 +218,7 @@ func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ c
 				)
 				g.board[i][j] = 0
 				g.board[i][changeJ(j)] *= 2
+				j = changeJ(j)
 				changed = true
 			} else if g.board[i][changeJ(j)] == 0 {
 				g.logger.Debug("moving",
@@ -228,13 +228,13 @@ func (g *TwoZeroFourEight) moveHorizontal(changeI, changeJ mover, compI, compJ c
 				)
 				g.board[i][changeJ(j)] = g.board[i][j]
 				g.board[i][j] = 0
-				moved = true
+				changed = true
 			}
 		}
 	}
 
-	if changed || moved {
-		temp := g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ)
+	if changed {
+		temp := g.moveHorizontal(changeI, changeJ, compI, compJ, startI, startJ, false)
 		changed = changed || temp
 	}
 
@@ -245,28 +245,27 @@ func (g *TwoZeroFourEight) moveLeft() bool {
 	greaterThanZero := greaterThan(0)
 	lessThanN := lessThan(N)
 
-	return g.moveHorizontal(inc, dec, lessThanN, greaterThanZero, 0, N-1)
+	return g.moveHorizontal(inc, dec, lessThanN, greaterThanZero, 0, N-1, true)
 }
 
 func (g *TwoZeroFourEight) moveRight() bool {
 	lessThanN := lessThan(N)
 	lessThanNMinusOne := lessThan(N - 1)
 
-	return g.moveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0)
+	return g.moveHorizontal(inc, inc, lessThanN, lessThanNMinusOne, 0, 0, true)
 }
 
-func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ comp, startI, startJ int) bool {
+func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ comp, startI, startJ int, combine bool) bool {
 	g.logger.Debug("Call to moveVertical")
 
 	changed := false
-	moved := false
 
 	for i := startI; compI(i); i = changeI(i) {
-		for j := startJ; compJ(j); j = changeJ(j) {
+		for j := startJ; compJ(j) && compI(i); j = changeJ(j) {
 			if g.board[i][j] == 0 {
 				continue
 			}
-			if g.board[i][j] == g.board[changeI(i)][j] {
+			if combine && g.board[i][j] == g.board[changeI(i)][j] {
 				g.logger.Debug("changing",
 					zap.Int("x", changeI(i)),
 					zap.Int("y", j),
@@ -275,6 +274,7 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 				)
 				g.board[i][j] = 0
 				g.board[changeI(i)][j] *= 2
+				i = changeI(i)
 				changed = true
 			} else if g.board[changeI(i)][j] == 0 {
 				g.logger.Debug("moving",
@@ -284,13 +284,13 @@ func (g *TwoZeroFourEight) moveVertical(changeI, changeJ mover, compI, compJ com
 				)
 				g.board[changeI(i)][j] = g.board[i][j]
 				g.board[i][j] = 0
-				moved = true
+				changed = true
 			}
 		}
 	}
 
-	if changed || moved {
-		temp := g.moveVertical(changeI, changeJ, compI, compJ, startI, startJ)
+	if changed {
+		temp := g.moveVertical(changeI, changeJ, compI, compJ, startI, startJ, false)
 		changed = changed || temp
 	}
 
@@ -301,14 +301,14 @@ func (g *TwoZeroFourEight) moveDown() bool {
 	lessThanNMinus1 := lessThan(N - 1)
 	lessThanN := lessThan(N)
 
-	return g.moveVertical(inc, inc, lessThanNMinus1, lessThanN, 0, 0)
+	return g.moveVertical(inc, inc, lessThanNMinus1, lessThanN, 0, 0, true)
 }
 
 func (g *TwoZeroFourEight) moveUp() bool {
 	greaterThan := greaterThan(0)
 	lessThanN := lessThan(N)
 
-	return g.moveVertical(dec, inc, greaterThan, lessThanN, N-1, 0)
+	return g.moveVertical(dec, inc, greaterThan, lessThanN, N-1, 0, true)
 }
 
 // Move is used by the controller
