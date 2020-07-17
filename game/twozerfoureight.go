@@ -1,4 +1,4 @@
-package twozerofoureight
+package game
 
 import (
 	"fmt"
