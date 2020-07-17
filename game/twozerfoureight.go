@@ -1,4 +1,4 @@
-package game
+package twozerofoureight
 
 import (
 	"fmt"
@@ -10,10 +10,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// N : N * N grid
 const N = 4
 const nDashed = 1 + (2 * (N + (2 << (N - 1)))) // Not even true :p
 const minStringSize = 350                      // Is 342 to be exqct :p
 
+// TwoZeroFourEight holds the state of the board,
+// the random seed and the colors mapping
 type TwoZeroFourEight struct {
 	board  [][]int
 	rand   *rand.Rand
@@ -23,43 +26,48 @@ type TwoZeroFourEight struct {
 	paddedText map[int]string
 }
 
+// NewGame initializes a new 2048 game
 func NewGame(logger *zap.Logger) *TwoZeroFourEight {
-	g := &TwoZeroFourEight{}
-	g.init(logger)
+	g := &TwoZeroFourEight{logger: logger}
+	g.init()
 
+	return g
+}
+
+func (g *TwoZeroFourEight) init() {
+	// Create random source
+	source := rand.NewSource(time.Now().UnixNano())
+	g.rand = rand.New(source)
+
+	// Initialize the 2D array
+	g.board = make([][]int, N)
+	for i := 0; i < N; i++ {
+		g.board[i] = make([]int, N)
+	}
+
+	// Fill bottom 3 cells with random numbers
+	g.board[N-1][0] = 2 << g.rand.Intn(2)
+	g.board[N-1][1] = 2 << g.rand.Intn(2)
+	g.board[N-2][0] = 2 << g.rand.Intn(2)
+
+	// Create a number to its text representation mapping
 	g.paddedText = make(map[int]string)
 	g.paddedText[0] = paddedText[0]
 	for i, j := 2, 1; i < 2048+1; i, j = i*2, j+1 {
 		g.paddedText[i] = paddedText[j]
 	}
 
+	// Create a number to its color representation mapping
+	// 8-bit colors
 	g.colorCodes = make(map[int]string)
 	g.colorCodes[0] = "\033[38;5;" + colorCodes[0] + "m"
 	for i, j := 2, 1; i < 2048+1; i, j = i*2, j+1 {
 		g.colorCodes[i] = "\033[38;5;" + colorCodes[j] + "m"
 	}
-
-	return g
-}
-
-func (g *TwoZeroFourEight) init(logger *zap.Logger) {
-	source := rand.NewSource(time.Now().UnixNano())
-	g.rand = rand.New(source)
-
-	g.board = make([][]int, N)
-	for i := 0; i < N; i++ {
-		g.board[i] = make([]int, N)
-	}
-
-	g.board[N-1][0] = 2 << g.rand.Intn(2)
-	g.board[N-1][1] = 2 << g.rand.Intn(2)
-	g.board[N-2][0] = 2 << g.rand.Intn(2)
-
-	g.logger = logger
 }
 
 func (g *TwoZeroFourEight) getString(i int) string {
-	return fmt.Sprintf("%s%s%s%s", colorOff, g.colorCodes[i], g.paddedText[i], colorOff)
+	return fmt.Sprintf("%s%s%s", g.colorCodes[i], g.paddedText[i], colorOff)
 }
 
 // Print returns a formatted visual rep of the board
@@ -243,30 +251,30 @@ func (g *TwoZeroFourEight) moveUp() bool {
 
 // Move is used by the controller
 func (g *TwoZeroFourEight) Move(move rune) bool {
-	done := false
+	var done bool
 	switch move {
 	case 'A':
-		done = g.moveLeft()
+		fallthrough
 	case 'a':
 		done = g.moveLeft()
 	case 'D':
-		done = g.moveRight()
+		fallthrough
 	case 'd':
 		done = g.moveRight()
 	case 'W':
-		done = g.moveUp()
+		fallthrough
 	case 'w':
 		done = g.moveUp()
 	case 'S':
-		done = g.moveDown()
+		fallthrough
 	case 's':
 		done = g.moveDown()
-	default:
-		done = false
 	}
+
 	if done {
 		g.logger.Debug("Move done")
 		g.fillRandom()
 	}
+
 	return done
 }
