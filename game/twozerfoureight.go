@@ -74,8 +74,7 @@ func (g *TwoZeroFourEight) Print() string {
 		for j := 0; j < N-1; j++ {
 			b.WriteString(fmt.Sprintf("%s  |  ", g.getString(g.board[i][j])))
 		}
-		b.WriteString(fmt.Sprintf("%s", g.getString(g.board[i][N-1])))
-		b.WriteString("  |\n")
+		b.WriteString(fmt.Sprintf("%s  |\n", g.getString(g.board[i][N-1])))
 		b.WriteString(strings.Repeat("-", nDashed))
 		b.WriteByte('\n')
 	}
