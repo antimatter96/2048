@@ -19,7 +19,7 @@ func main() {
 
 	fmt.Println("Welcome")
 	fmt.Println(gameInstance.Print())
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 1000; i++ {
 		char, _, err := reader.ReadRune()
 
 		if err != nil {
@@ -27,12 +27,9 @@ func main() {
 		}
 		print("\033[H\033[2J")
 		fmt.Println("You entered", string(char))
-		switch char {
-		case 'E':
-			break
-		default:
-			gameInstance.Move(char)
-		}
+
+		gameInstance.Move(char)
+
 		fmt.Println(gameInstance.Print())
 
 		char, _, _ = reader.ReadRune()
