@@ -18,11 +18,27 @@ type TwoZeroFourEight struct {
 	board  [][]int
 	rand   *rand.Rand
 	logger *zap.Logger
+
+	colorCodes map[int]string
+	paddedText map[int]string
 }
 
 func NewGame(logger *zap.Logger) *TwoZeroFourEight {
 	g := &TwoZeroFourEight{}
 	g.init(logger)
+
+	g.paddedText = make(map[int]string)
+	g.paddedText[0] = paddedText[0]
+	for i, j := 2, 1; i < 2048+1; i, j = i*2, j+1 {
+		g.paddedText[i] = paddedText[j]
+	}
+
+	g.colorCodes = make(map[int]string)
+	g.colorCodes[0] = "\033[38;5;" + colorCodes[0] + "m"
+	for i, j := 2, 1; i < 2048+1; i, j = i*2, j+1 {
+		g.colorCodes[i] = "\033[38;5;" + colorCodes[j] + "m"
+	}
+
 	return g
 }
 
@@ -42,6 +58,10 @@ func (g *TwoZeroFourEight) init(logger *zap.Logger) {
 	g.logger = logger
 }
 
+func (g *TwoZeroFourEight) getString(i int) string {
+	return fmt.Sprintf("%s%s%s%s", colorOff, g.colorCodes[i], g.paddedText[i], colorOff)
+}
+
 func (g *TwoZeroFourEight) Print() string {
 	var b strings.Builder
 	b.Grow(minStringSize)
@@ -51,9 +71,9 @@ func (g *TwoZeroFourEight) Print() string {
 	for i := 0; i < N; i++ {
 		b.WriteString("|  ")
 		for j := 0; j < N-1; j++ {
-			b.WriteString(fmt.Sprintf("%-5d  |  ", g.board[i][j]))
+			b.WriteString(fmt.Sprintf("%s  |  ", g.getString(g.board[i][j])))
 		}
-		b.WriteString(fmt.Sprintf("%-5d", g.board[i][N-1]))
+		b.WriteString(fmt.Sprintf("%s", g.getString(g.board[i][N-1])))
 		b.WriteString("  |\n")
 		b.WriteString(strings.Repeat("-", nDashed))
 		b.WriteByte('\n')
